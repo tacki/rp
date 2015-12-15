@@ -1,0 +1,53 @@
+<?php if (\Base::instance()->get('SESSION.errormsg') != "") : ?>
+<div class="alert alert-danger">
+    <i class="glyphicon glyphicon-exclamation-sign"></i>
+    <?php 
+        echo \Base::instance()->get('SESSION.errormsg');
+        \Base::instance()->clear('SESSION.errormsg');
+    ?>
+</div>
+<?php endif ?>
+
+<div class="table-responsive">
+<table class="table table-bordered table-hover table-condensed">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Kommentar</th>
+            <th>Teilnahme</th>
+        </tr>
+    </thead>
+    
+    <tbody>
+<?php foreach (\Base::instance()->get('registrations') as $registration):?>
+    <?php if ($registration->participation == 1) : ?>
+    <tr class="success">
+        <td><?php echo ++$i ?></td>
+        <td><?php echo $registration->playername ?></td>
+        <td><?php echo $registration->comment ?></td>     
+        <td><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></td>
+    <?php elseif ($registration->participation == 2) : ?>
+    <tr class="warning">
+        <td><?php echo ++$i ?></td>
+        <td><?php echo $registration->playername ?></td>
+        <td><?php echo $registration->comment ?></td>     
+        <td></td>        
+    <?php else : ?>
+    <tr class="danger">
+        <td><?php echo ++$i ?></td>
+        <td><?php echo $registration->playername ?></td>
+        <td><?php echo $registration->comment ?></td> 
+        <td><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></td>
+    <?php endif; ?>
+    </tr>
+<?php endforeach;?>   
+    </tbody>
+    
+    <tfoot>
+        <tr>
+            <td colspan="4">&nbsp;</td>
+        </tr>
+    </tfoot>
+</table>
+</div>

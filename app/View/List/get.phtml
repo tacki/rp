@@ -1,0 +1,52 @@
+<?php if (\Base::instance()->get('SESSION.errormsg') != "") : ?>
+<div class="alert alert-danger">
+    <i class="glyphicon glyphicon-exclamation-sign"></i>
+    <?php 
+        echo \Base::instance()->get('SESSION.errormsg');
+        \Base::instance()->clear('SESSION.errormsg');
+    ?>
+</div>
+<?php endif ?>
+
+<div class="table-responsive">
+<table class="table table-bordered table-hover table-condensed table-striped">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>Name</th>
+            <th>Spieler</th>
+            <th>Schwierigkeit</th>
+            <th>RW</th>
+            <th>Zeitpunkt</th>
+        </tr>
+    </thead>
+    
+    <tbody>
+<?php foreach (\Base::instance()->get('raidlist') as $raid):?>
+    <tr>
+        <td><a href="/show/<?php echo $raid->id ?>"><?php echo $raid->id ?></a></td>
+        <td><?php echo $raid->name ?></td>
+        <td><?php echo $raid->players ?></td>     
+        <td><?php echo $raid->difficulty ?></td>   
+        <td><?php echo $raid->armorclass ?></td>    
+        <td><?php echo date("d.m.Y H:i", strtotime($raid->datetime)) ?></td>     
+    </tr>
+<?php endforeach;?>   
+    </tbody>
+    
+    <tfoot>
+        <tr>
+            <td colspan="6">&nbsp;</td>
+        </tr>
+    </tfoot>
+</table>
+</div>
+
+<script>
+    $('tr').click(function() {
+        var href = $(this).find("a").attr("href");
+        if(href) {
+            window.location = href;
+        }
+    });
+</script>
