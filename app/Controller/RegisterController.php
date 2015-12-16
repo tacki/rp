@@ -42,8 +42,6 @@ class RegisterController extends Controller
     
     public function get($f3) 
     {
-        $f3->set('headTitle', 'Für Raid anmelden');
-        
         // Header
         $raidsView = $this->getDB('v_raids');
         $raidinfo = $raidsView->findone('id='.$f3->get('PARAMS.raidid'));
@@ -68,9 +66,8 @@ class RegisterController extends Controller
             $registration->copyfrom('POST');
             $registration->save();         
         } else {            
-            var_dump ($this->registerForm->getFailedFields());
-            $f3->set('SESSION.failedFields', array_flip($this->registerForm->getFailedFields()));            
-            $f3->set('SESSION.errormsg', implode("<br>", $this->registerForm->getFailedFields()));
+            $f3->set('SESSION.failedFields', array_keys($this->authForm->getFailedFields()));
+            $f3->set('SESSION.errormsg', implode("<br>", $this->authForm->getFailedFields()));
         }
     }
 }

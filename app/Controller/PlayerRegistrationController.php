@@ -43,7 +43,7 @@ class PlayerRegistrationController extends Controller
     
     public function get($f3)
     {
-        $f3->set('headTitle', 'Spieler registrieren');        
+      
     }
     
     public function post($f3)
@@ -59,9 +59,8 @@ class PlayerRegistrationController extends Controller
             $this->mail->setSubject("RP Player Registration")
                        ->sendMessage("registration", $newPlayer->email);
         } else {            
-            var_dump ($this->playerRegistrationForm->getFailedFields());
-            $f3->set('SESSION.failedFields', array_flip($this->playerRegistrationForm->getFailedFields()));            
-            $f3->set('SESSION.errormsg', implode("<br>", $this->playerRegistrationForm->getFailedFields()));
+            $f3->set('SESSION.failedFields', array_keys($this->authForm->getFailedFields()));
+            $f3->set('SESSION.errormsg', implode("<br>", $this->authForm->getFailedFields()));
             $f3->reroute('/playerregistration');
         }        
     }

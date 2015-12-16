@@ -36,7 +36,6 @@ class AuthController extends Controller
     
     public function get($f3)
     {
-        $f3->set('headTitle', 'Login');     
     }    
     
     public function post($f3)                       
@@ -53,8 +52,8 @@ class AuthController extends Controller
             }
  
         } else {
-            $f3->set('SESSION.failedFields', array_flip($this->createForm->getFailedFields()));
-            $f3->set('SESSION.errormsg', implode("<br>", $this->createForm->getFailedFields()));
+            $f3->set('SESSION.failedFields', array_keys($this->authForm->getFailedFields()));
+            $f3->set('SESSION.errormsg', implode("<br>", $this->authForm->getFailedFields()));
             $f3->reroute('/auth');
         }
     } 

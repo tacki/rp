@@ -36,8 +36,6 @@ class CreateController extends Controller
     
     public function get($f3) 
     {
-        $f3->set('headTitle', 'Raid erstellen');
-        
         $raidtypes = $this->getDB('raidtypes');
         $result = $raidtypes->find("enabled=1");
         
@@ -57,8 +55,8 @@ class CreateController extends Controller
             $raid->creationdate = date("Y-m-d H:i:s");
             $raid->save();    
         } else {
-            $f3->set('SESSION.failedFields', array_flip($this->createForm->getFailedFields()));
-            $f3->set('SESSION.errormsg', implode("<br>", $this->createForm->getFailedFields()));
+            $f3->set('SESSION.failedFields', array_keys($this->authForm->getFailedFields()));
+            $f3->set('SESSION.errormsg', implode("<br>", $this->authForm->getFailedFields()));
             $f3->reroute('/create');
         }
     }    
