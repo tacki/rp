@@ -1,37 +1,47 @@
 <?php if (\Base::instance()->get('SESSION.errormsg') != "") : ?>
-<div class="panel panel-danger">
-    <div class="panel-heading">Error!</div>
-    <div class="panel-body">
+<div class="alert alert-danger">
     <i class="glyphicon glyphicon-exclamation-sign"></i>
     <?php 
         echo \Base::instance()->get('SESSION.errormsg');
         \Base::instance()->clear('SESSION.errormsg');
     ?>
-    </div>
 </div>
 <?php endif ?>
 
-<form action="/create"  method="POST" enctype="multipart/form-data">
+<form action="/create"  method="POST" enctype="multipart/form-data" class="col-md-4 col-lg-4">
+    
     <div class="form-group">
-        <label for="raidtypeid">Raid</label>
-        <select name="raidtypeid" class="form-control">
+        <label for="raidtypeid" class="control-label">Raid</label>
+        
+        <select name="raidtypeid" id="raidtypeid" class="form-control">
         <?php foreach (\Base::instance()->get('raidtypes') as $raidtype):?>
             <option value="<?php echo $raidtype->id ?>">
                 <?php echo $raidtype->name." ".$raidtype->players." (".$raidtype->difficulty.")" ?>
             </option>
-        <?php endforeach;?>    
+        <?php endforeach; ?>    
         </select>
     </div>
     
-    <div class="form-group">
-        <label for="date">Datum</label>
-        <input type="date" name="date" placeholder="<?php echo date('d.m.Y'); ?>" class="form-control" value="<?php echo date('d.m.Y'); ?>" required>    
+    <div class="form-group">     
+        <label for="date" class="control-label">Datum</label>
+        
+        <input type="date" name="date" id="date" placeholder="<?php echo date('d.m.Y'); ?>" class="form-control" value="<?php echo date('d.m.Y'); ?>" required>    
     </div>
         
     <div class="form-group">
-        <label for="time">Zeit</label>
-        <input type="time" name="time" placeholder="20:00" class="form-control" value="20:00" required>    
+        <label for="time" class="control-label">Zeit</label>
+        
+        <input type="time" name="time" id="time" placeholder="20:00" class="form-control" value="20:00" required>    
     </div>
     
     <input type="submit" name="submit" class="btn btn-primary" value="Raid anlegen"> 
 </form>
+
+<script>
+    <?php if (is_array(\Base::instance()->get('SESSION.failedFields'))) : ?>
+    <?php foreach (\Base::instance()->get('SESSION.failedFields') as $fieldname) : ?>
+    $("#<?php echo $fieldname ?>").parent().addClass('has-error');
+    <?php endforeach; ?>
+    <?php \Base::instance()->clear('SESSION.failedFields'); ?>
+    <?php endif ?>
+</script>

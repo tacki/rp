@@ -9,14 +9,14 @@
     $f3->config('../app/config.ini');
     
     // Database init
-    $connstr = $f3->get('database')['TYPE'].":".
-               "host=".$f3->get('database')['HOST'].";".
-               "port=".$f3->get('database')['PORT'].";".
-               "dbname=".$f3->get('database')['DBNAME'];
+    $connstr = $f3->get('database.TYPE').":".
+               "host=".$f3->get('database.HOST').";".
+               "port=".$f3->get('database.PORT').";".
+               "dbname=".$f3->get('database.DBNAME');
     $f3->set('DB', new DB\SQL(
                 $connstr,
-                $f3->get('database')['DBUSER'],
-                $f3->get('database')['DBPASS']
+                $f3->get('database.DBUSER'),
+                $f3->get('database.DBPASS')
             ));
 
     // run

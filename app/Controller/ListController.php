@@ -22,7 +22,7 @@ class ListController extends Controller
 {
     public function get($f3)
     {
-        $f3->set('headTitle', 'Raid');
+        $f3->set('headTitle', 'Geplante Raids');
         
         // get Raidinfo
         $raidsView = $this->getDB('v_raids');

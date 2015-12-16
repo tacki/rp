@@ -42,6 +42,8 @@ class RegisterController extends Controller
     
     public function get($f3) 
     {
+        $f3->set('headTitle', 'Für Raid anmelden');
+        
         // Header
         $raidsView = $this->getDB('v_raids');
         $raidinfo = $raidsView->findone('id='.$f3->get('PARAMS.raidid'));

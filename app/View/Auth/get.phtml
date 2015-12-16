@@ -1,0 +1,35 @@
+<?php if (\Base::instance()->get('SESSION.errormsg') != "") : ?>
+<div class="alert alert-danger">
+    <i class="glyphicon glyphicon-exclamation-sign"></i>
+    <?php 
+        echo \Base::instance()->get('SESSION.errormsg');
+        \Base::instance()->clear('SESSION.errormsg');
+    ?>
+</div>
+<?php endif ?>
+
+<form action=""  method="POST" enctype="multipart/form-data" class="col-md-4 col-lg-4">
+    
+    <div class="form-group">
+        <label for="username" class="control-label">Username</label>
+        
+        <input type="datetime" name="username" id="username" placeholder="Username" class="form-control">
+    </div>        
+    
+    <div class="form-group">    
+        <label for="password" class="control-label">Password</label>
+        
+        <input type="password" name="password" id="password" placeholder="Password" class="form-control">   
+    </div>        
+    
+    <input type="submit" name="submit" class="btn btn-primary" value="Login"> 
+</form>
+
+<script>
+    <?php if (is_array(\Base::instance()->get('SESSION.failedFields'))) : ?>
+    <?php foreach (\Base::instance()->get('SESSION.failedFields') as $fieldname) : ?>
+    $("#<?php echo $fieldname ?>").parent().addClass('has-error');
+    <?php endforeach; ?>
+    <?php \Base::instance()->clear('SESSION.failedFields'); ?>
+    <?php endif ?>
+</script>

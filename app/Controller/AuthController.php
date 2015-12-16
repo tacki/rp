@@ -18,48 +18,44 @@
  */
 namespace Controller;
 
-use Form\CreateForm;
+use Form\AuthForm;
 
-class CreateController extends Controller
+class AuthController extends Controller
 {
     /**
-     * @var CreateForm
+     * @var AuthForm
      */
-    protected $createForm;
-    
+    protected $authForm;
+        
     public function __construct()
     {
         parent::__construct();
         
-        $this->createForm = new CreateForm;
+        $this->authForm = new AuthForm;
     }
     
-    public function get($f3) 
+    public function get($f3)
     {
-        $f3->set('headTitle', 'Raid erstellen');
-        
-        $raidtypes = $this->getDB('raidtypes');
-        $result = $raidtypes->find("enabled=1");
-        
-        $f3->set('raidtypes', $result);
-    }
+        $f3->set('headTitle', 'Login');     
+    }    
     
     public function post($f3)                       
     {        
-        $raid = $this->getDB('raids');
+        if ($this->authForm->isValid($f3->get('POST'))) {
+            $auth = new \Auth($this->getDB('users'), array('id'=>'username', 'pw'=>'password'));
+            $crypt = \Bcrypt::instance();
 
-        if ($this->createForm->isValid($f3->get('POST'))) {
-
-            $datetime = date("Y-m-d H:i:s", strtotime($f3->get('POST.date').' '.$f3->get('POST.time')));
-
-            $raid->copyFrom('POST');        
-            $raid->datetime = $datetime;
-            $raid->creationdate = date("Y-m-d H:i:s");
-            $raid->save();    
+            if ($auth->login($f3->get('POST.username'), $crypt->hash($f3->get('POST.password', $f3->get('crypt.SALT'))))) {
+                //echo "ok!";
+            } else {
+                $f3->set('SESSION.errormsg', "Wrong Username or Password");
+                $f3->reroute('/auth');
+            }
+ 
         } else {
             $f3->set('SESSION.failedFields', array_flip($this->createForm->getFailedFields()));
             $f3->set('SESSION.errormsg', implode("<br>", $this->createForm->getFailedFields()));
-            $f3->reroute('/create');
+            $f3->reroute('/auth');
         }
-    }    
+    } 
 }

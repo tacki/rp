@@ -9,9 +9,35 @@
     </head>
     <body>
         <font face="Arial">
-        <div class="container col-xs-12 col-sm-offset-2 col-sm-8 col-md-offset-2 col-md-6">
-            <p class="logo"><a href="/">Home</a></p>
-            <hr class="headspacer">
+        <div class="container col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                          <span class="sr-only">Toggle navigation</span>
+                          <span class="icon-bar"></span>
+                          <span class="icon-bar"></span>
+                          <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand">RP</a>
+                    </div>
+                    
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav">
+                            <li><a href="/">Home <span class="sr-only">(current)</span></a></li>
+                            <li><a href="/create">Create Raid <span class="sr-only">(current)</span></a></li>
+                            <li><a href="/list">List Raids <span class="sr-only">(current)</span></a></li>
+                            <li><a href="/playerregistration">Register Player <span class="sr-only">(current)</span></a></li>
+                        </ul>
+                            
+                        <form action="/auth" method="get">
+                            <button type="submit" class="btn btn-default navbar-btn navbar-right">Login</button>        
+                        </form>
+                    </div>
+                    
+                </div>
+            </nav>
+            
             <h1>
                 <?php echo \Base::instance()->get('headTitle'); ?>
                 <small><?php echo \Base::instance()->get('headSubTitle'); ?></small>
