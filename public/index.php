@@ -5,8 +5,9 @@
     // autoloader
     $f3->set('AUTOLOAD','../app/');
     
-    // load config
-    $f3->config('../app/config.ini');
+    // load configs
+    $f3->config('../app/config/config.ini');
+    $f3->config('../app/config/routing.ini');
     
     // Database init
     $connstr = $f3->get('database.TYPE').":".

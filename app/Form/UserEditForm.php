@@ -18,16 +18,24 @@
  */
 namespace Form;
 
-class AuthForm extends Form
+class UserEditForm extends Form
 {
     public function getFormFields() 
     {
         return array(
+            'id' => array(
+                'type' => 'int',
+                'required' => true,                
+            ),
             'email' => array(
                 'type' => 'email',
                 'required' => true,
-            ),
+            ), 
             'password' => array(
+                'type' => 'string',
+                'required' => true,
+            ),
+            'password2' => array(
                 'type' => 'string',
                 'required' => true,
             ),

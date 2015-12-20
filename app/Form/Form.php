@@ -110,6 +110,12 @@ abstract class Form
                     return false;
                 }
                 break;
+            case 'datetime':
+                if (!$this->validateDate($value, 'd.m.Y H:i')) {
+                    $this->failedFields[$name] = "invalid data (not a datetime)";
+                    return false;
+                }                
+                break;
             case 'email':
                 if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
                     $this->failedFields[$name] = "invalid data (not a email)";

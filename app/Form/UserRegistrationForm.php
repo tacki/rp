@@ -18,7 +18,7 @@
  */
 namespace Form;
 
-class AuthForm extends Form
+class UserRegistrationForm extends Form
 {
     public function getFormFields() 
     {
@@ -26,11 +26,15 @@ class AuthForm extends Form
             'email' => array(
                 'type' => 'email',
                 'required' => true,
-            ),
+            ), 
             'password' => array(
                 'type' => 'string',
                 'required' => true,
             ),
+            'password2' => array(
+                'type' => 'string',
+                'required' => true,
+            ),            
             'submit' => array(
                 'type' => 'submit',
                 'required' => true,

@@ -19,20 +19,57 @@
                           <span class="icon-bar"></span>
                           <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand">RP</a>
+                        <a class="navbar-brand">RaidPlaner</a>
                     </div>
                     
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
                             <li><a href="/">Home <span class="sr-only">(current)</span></a></li>
-                            <li><a href="/create">Create Raid <span class="sr-only">(current)</span></a></li>
-                            <li><a href="/list">List Raids <span class="sr-only">(current)</span></a></li>
-                            <li><a href="/playerregistration">Register Player <span class="sr-only">(current)</span></a></li>
+                            <?php if(\Base::instance()->get('SESSION.user')) : ?>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Character <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/character/create">Create</a></li>
+                                    <li><a href="/character/list">List</a></li>
+                                </ul>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Raid <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <?php if(\Base::instance()->get('SESSION.user.raidleader')) : ?>
+                                    <li><a href="/raid/create">Create</a></li>
+                                    <?php endif ?>
+                                    <li><a href="/raid/list">List</a></li>
+                                </ul>
+                            </li>      
+                            <?php if(\Base::instance()->get('SESSION.user.admin')) : ?>                            
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="/user/list">Userlist</a></li>
+                                </ul>
+                            </li>     
+                            <?php endif ?>
+                            <?php else : ?>
+                            <li><a href="/user/create">Register User <span class="sr-only">(current)</span></a></li>
+                            <?php endif ?>
                         </ul>
                             
-                        <form action="/auth" method="get">
-                            <button type="submit" class="btn btn-default navbar-btn navbar-right">Login</button>        
-                        </form>
+                        <?php if(\Base::instance()->get('SESSION.user')) : ?>
+                        <div class="btn-group navbar-btn navbar-right">
+                            <button type="button" class="btn btn-default"><?php echo \Base::instance()->get('SESSION.user.email') ?></button>
+                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <span class="caret"></span>
+                              <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                              <li><a href="/user/edit/<?php echo \Base::instance()->get('SESSION.user.id') ?>">Edit</a></li>
+                              <li><a href="/logout">Logout</a></li>
+                            </ul>
+                        </div>
+                        <?php else : ?>
+                        <a type="button" href="/auth" class="btn btn-default navbar-btn navbar-right">Login</a> 
+                        <?php endif ?>
                     </div>
                     
                 </div>

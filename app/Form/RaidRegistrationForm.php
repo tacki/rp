@@ -18,19 +18,31 @@
  */
 namespace Form;
 
-class AuthForm extends Form
+class RaidRegistrationForm extends Form
 {
     public function getFormFields() 
     {
         return array(
-            'email' => array(
-                'type' => 'email',
+            'raidid' => array(
+                'type' => 'numeric',
                 'required' => true,
             ),
-            'password' => array(
+            'datetime' => array(
+                'type' => 'datetime',
+                'required' => true,
+            ),            
+            'characterid' => array(
+                'type' => 'numeric',
+                'required' => true,
+            ),
+            'participation' => array(
+                'type' => 'numeric',
+                'required' => true,
+            ),
+            'text' => array(
                 'type' => 'string',
-                'required' => true,
-            ),
+                'required' => false,
+            ),            
             'submit' => array(
                 'type' => 'submit',
                 'required' => true,

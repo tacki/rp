@@ -18,17 +18,21 @@
  */
 namespace Form;
 
-class AuthForm extends Form
+class CharacterRegistrationForm extends Form
 {
     public function getFormFields() 
     {
         return array(
-            'email' => array(
-                'type' => 'email',
+            'name' => array(
+                'type' => 'string',
                 'required' => true,
             ),
-            'password' => array(
-                'type' => 'string',
+            'charactertypeid' => array(
+                'type' => 'int',
+                'required' => true,
+            ),
+            'armorclass' => array(
+                'type' => 'int',
                 'required' => true,
             ),
             'submit' => array(

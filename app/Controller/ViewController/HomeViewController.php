@@ -16,25 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-namespace Form;
+namespace Controller\ViewController;
 
-class AuthForm extends Form
+class HomeViewController extends ViewController
 {
-    public function getFormFields() 
+    public function get($f3)
     {
-        return array(
-            'email' => array(
-                'type' => 'email',
-                'required' => true,
-            ),
-            'password' => array(
-                'type' => 'string',
-                'required' => true,
-            ),
-            'submit' => array(
-                'type' => 'submit',
-                'required' => true,
-            ),            
-        );
+        // no logic here
     }
 }
