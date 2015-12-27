@@ -48,6 +48,10 @@ class SecurityServiceController
         
         // public page checking
         foreach($f3->get('access.ALLOWPUBLIC') as $publicroute) {
+            
+            // escape slashes
+            $publicroute = str_replace("/","\/",$publicroute);
+            
             if (preg_match("/^".$publicroute."$/", $f3->get('PATTERN')) ||
                 preg_match("/^".$publicroute."$/", $f3->get('PATH'))) {
                 return true;
@@ -67,6 +71,10 @@ class SecurityServiceController
         
         // raidleader route checking
         foreach($f3->get('access.ALLOWRAIDLEAD') as $raidleadroute) {
+            
+            // escape slashes
+            $raidleadroute = str_replace("/","\/",$raidleadroute);            
+            
             if (preg_match("/^".$raidleadroute."$/", $f3->get('PATTERN')) ||
                 preg_match("/^".$raidleadroute."$/", $f3->get('PATH'))) {
                 return true;

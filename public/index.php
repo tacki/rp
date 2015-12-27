@@ -6,8 +6,8 @@
     $f3->set('AUTOLOAD','../app/');
     
     // load configs
-    $f3->config('../app/config/config.ini');
-    $f3->config('../app/config/routing.ini');
+    $f3->config('../app/config/config.ini', false);
+    $f3->config('../app/config/routing.ini', true);
     
     // load Game specification
     $spec = include '../app/config/specifications/'.$f3->get('SPECIFICATION').'.php';
