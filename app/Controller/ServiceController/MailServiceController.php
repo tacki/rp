@@ -43,17 +43,19 @@ class MailServiceController
      * @param string $template Message Template
      * @param string $to Receiver Mailaddress
      */
-    public function sendMessage($template, $to) 
+    public function sendMessage($template, array $to) 
     {
         $f3 = \Base::instance();
         
+        $this->smtp->set('Content-Type', 'text/html; charset=UTF-8');
+        
         $this->smtp->set('From', $f3->get('mail.FROM'));
-        $this->smtp->set('To', $to);
+        $this->smtp->set('To', $f3->get('mail.FROM'));
+        $this->smtp->set('Bcc', "<".implode('>;<',$to).">");
         
         $message =  \View::instance()->render('MailView\\'.$template.".phtml");
-        
-        echo "sending message $message from {$f3->get('mail.FROM')} to $to<br>";
-        //$this->smtp->send($message);
+
+        $this->smtp->send($message);
     }
     
     /**

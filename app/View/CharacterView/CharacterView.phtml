@@ -1,0 +1,160 @@
+<?php $f3 = \Base::instance() ?>
+
+<?php if ($f3->get('PARAMS.action') == "list") : ?>
+<div class="table-responsive">
+<table class="table table-bordered table-hover table-condensed table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Klasse</th>
+            <th>Rolle</th>
+            <th>Rüstwert</th>
+            <th></th>
+        </tr>
+    </thead>
+    
+    <tbody>
+<?php foreach ($f3->get('characters') as $character):?>
+    <tr>
+        <td><?php echo $character->name ?></td>
+        <td><?php echo $f3->get("game.classes.{$character->class}.name") ?></td>
+        <td><?php echo $f3->get("game.roles.{$character->role}") ?></td>
+        <td><?php echo $f3->get("game.armorclasses.{$character->armorclass}") ?></td>     
+        <td>
+            <a class="btn btn-warning btn-sm" href="/character/edit/<?php echo $character->id ?>" role="button">
+                <i class="glyphicon glyphicon-pencil"></i> Ändern
+            </a>
+            <a class="btn btn-danger btn-sm" href="/character/delete/<?php echo $character->id ?>" role="button">
+                <i class="glyphicon glyphicon-remove"></i> Löschen
+            </a>
+        </td>      
+    </tr>
+<?php endforeach;?>   
+    </tbody>
+    
+</table>
+</div>
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == "create") : ?>
+<div class="well bs-component col-md-4 col-lg-4">
+    <legend>Charakter anlegen</legend>
+    <form action=""  method="POST" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label for="name" class="control-label">Name</label> 
+
+            <input type="text" name="name" id="name" placeholder="Charaktername" class="form-control" required>        
+        </div>    
+        
+        <div class="form-group">
+            <label for="class" class="control-label">Klasse</label>    
+
+            <select name="class" id="class" class="form-control">
+                <?php foreach ($f3->get('game.classes') as $id=>$class) :?>
+                <option value='<?php echo $id ?>'><?php echo $class['name'] ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>        
+
+        <div class="form-group" id="role">    
+            <label class="control-label">Bevorzugte Rolle</label>
+            <?php foreach ($f3->get('game.roles') as $id=>$role) : ?>
+            <div class="radio">
+                <label><input type="radio" name="role" value='<?php echo $id ?>'><?php echo $role ?></label>
+            </div>      
+            <?php endforeach ?>         
+        </div>        
+
+        <div class="form-group">
+            <label class="control-label">Rüstwert</label>    
+
+            <div id="armorclass">            
+            <?php foreach($f3->get('game.armorclasses') as $id=>$armorclass) : ?>
+                <div class="radio">
+                    <label><input type="radio" name="armorclass" value='<?php echo $id ?>'><?php echo $armorclass ?></label>
+                </div>
+            <?php endforeach ?>
+            </div> 
+        </div>        
+
+        <input type="submit" name="submit" class="btn btn-primary" value="Charakter anlegen"> 
+    </form>
+</div>
+
+<script>
+$(function () {
+    var hybridids = <?php echo json_encode($f3->get('game.hybridclasses')) ?>;
+    
+    $("#class").change(function() {
+        $('input[name=role][value=1]').prop("checked",true);        
+        if (hybridids.indexOf(parseInt($(this).val())) >= 0) {
+            $("#role").show();
+        } else {
+            $("#role").hide();
+        }
+    });  
+    
+    // Fire on onload
+    $("#class").change();
+});  
+</script>
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == "edit") : ?>
+<?php $character = $f3->get('character') ?>
+<div class="well bs-component col-md-4 col-lg-4">
+    <legend>Charakter editieren</legend>
+    <form action=""  method="POST" enctype="multipart/form-data">
+
+        <input type="hidden" name="id" value="<?php echo $character->id ?>">
+        
+        <div class="form-group">
+            <label for="name" class="control-label">Name</label> 
+
+            <input type="text" name="name" id="name" value="<?php echo $character->name ?>" class="form-control" readonly>        
+        </div>    
+        
+        <div class="form-group">
+            <label class="control-label">Klasse</label>    
+
+            <input type="text" name="class" id="class" value="<?php echo $f3->get("game.classes.{$character->class}.name") ?>" class="form-control" readonly> 
+        </div> 
+        
+        <?php if (in_array($character->class, $f3->get('game.hybridclasses'))) : ?>
+        <div class="form-group" id="role">    
+            <label class="control-label">Bevorzugte Rolle</label>
+            <?php foreach ($f3->get('game.roles') as $id=>$role) : ?>
+            <div class="radio">
+                <label><input type="radio" name="role" value='<?php echo $id ?>' <?php echo $character->role==$id?'checked':''?>><?php echo $role ?></label>
+            </div>      
+            <?php endforeach ?>         
+        </div>          
+        <?php endif ?>
+
+        <div class="form-group">
+            <label class="control-label">Rüstwert</label>    
+
+            <div id="armorclass">            
+            <?php foreach($f3->get('game.armorclasses') as $id=>$armorclass) : ?>
+                <div class="radio">
+                    <label><input type="radio" name="armorclass" value='<?php echo $id ?>' <?php echo $character->armorclass==$id?'checked':''?>><?php echo $armorclass ?></label>
+                </div>
+            <?php endforeach ?>
+            </div>                 
+        </div>        
+
+        <input type="submit" name="submit" class="btn btn-primary" value="Submit"> 
+    </form>
+</div>
+
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == "delete") : ?>
+<p>Lösche Character <?php echo $f3->get('character')->name ?>?</p>
+<form action=""  method="POST" enctype="multipart/form-data">
+    <input type="submit" name="submit" class="btn btn-danger" value="Löschen">
+    <a class="btn btn-primary" href="/character/list" role="button">Zurück</a>
+</form>
+<?php endif ?>
+    

@@ -36,17 +36,24 @@ class AuthViewController extends ViewController
     
     public function get($f3)
     {
+        switch ($f3->get('PARAMS.action')) {
+            case 'logout':
+                $f3->clear('SESSION.user');
+                $f3->reroute('/');                
+                break;
+            
+        }
     }    
     
     public function post($f3)                       
     {        
         if ($this->authForm->isValid($f3->get('POST'))) {
             $users = $this->getDB('users');
-            $user = $users->findOne('email = \''.$f3->get('POST.email').'\'');
+            $user = $users->findOne(array('email=?',$f3->get('POST.email')));
             $crypt = \Bcrypt::instance();
             
             if ($user->mailvalidation) {
-                $f3->set('SESSION.errormsg', "Account not activated");
+                $f3->set('SESSION.errormsg', 'Account nicht aktiviert!');
                 $f3->reroute('/auth');                
             } elseif ($crypt->verify($f3->get('POST.password'), $user->password)) {     
                 $f3->set('SESSION.user', array('id' => $user->id,
@@ -59,7 +66,7 @@ class AuthViewController extends ViewController
                     $f3->reroute('/');
                 }
             } else {
-                $f3->set('SESSION.errormsg', "Wrong EMail or Password");
+                $f3->set('SESSION.errormsg', 'EMail oder Passwort falsch');
                 $f3->reroute('/auth');
             }
  

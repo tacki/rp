@@ -22,6 +22,7 @@ use Controller\ServiceController\MailServiceController;
 use Form\RaidCreateForm;
 use Form\RaidEditForm;
 use Form\RaidRegistrationForm;
+use Form\RaidInviteForm;
 
 
 
@@ -35,11 +36,17 @@ class RaidViewController extends ViewController
     /**
      * @var RaidEditForm
      */
-    protected $raidEditForm;    
+    protected $raidEditForm;   
+    
     /**
      * @var RaidRegistrationForm
      */
-    protected $raidRegistrationForm;        
+    protected $raidRegistrationForm;   
+    
+    /**
+     * @var RaidInviteForm
+     */
+    protected $raidInviteForm;       
     
     /**
      * @var MailServiceController 
@@ -53,72 +60,85 @@ class RaidViewController extends ViewController
         $this->raidCreateForm = new RaidCreateForm;
         $this->raidEditForm = new RaidEditForm;
         $this->raidRegistrationForm = new RaidRegistrationForm;
+        $this->raidInviteForm = new RaidInviteForm;
         $this->mail = new MailServiceController;
     }
     
     public function get($f3)
     {
         switch ($f3->get('PARAMS.action')) {
-            default:   
             case 'list':
-                $f3->set('headTitle', 'Planned Raids');
+                $f3->set('headTitle', 'Geplante Raids');
 
                 // get Raidinfo
-                $raidsView = $this->getDB('v_raids');
-                $raidlist = $raidsView->find('datetime > now()');
+                $raidsDB = $this->getDB('raids');
+                $raidlist = $raidsDB->find(array(),
+                                           array('order' => 'datetime ASC'));
 
                 $f3->set('raidlist', $raidlist);                   
                 break;
             
-            case 'show':
+            case 'show':                
+                $raidsDB = $this->getDB('raids');
+                $raid = $raidsDB->findone(array('id=?',$f3->get('PARAMS.raidid')));
+                
                 // Header
-                $raidsView = $this->getDB('v_raids');
-                $raidinfo = $raidsView->findone('id='.$f3->get('PARAMS.raidid'));
-
-                $f3->set('headTitle', $raidinfo->name);
-                $f3->set('headSubTitle', $raidinfo->players." Spieler (".$raidinfo->difficulty.")");        
+                $raidinfo = $f3->get('game.raids.'.$raid->raidtypeid);
+                
+                $f3->set('headTitle', $raidinfo['name']);
+                $f3->set('headSubTitle', $raidinfo['players']." Spieler (".$raidinfo['difficulty'].")");        
 
                 // get registration info
                 $registrationsView = $this->getDB('v_registrations');
-                $registrations = $registrationsView->find('raidid='.$f3->get('PARAMS.raidid'), array('order' => 'participation DESC'));        
+                $registrations = $registrationsView->find(array('raidid=?',
+                                                                $f3->get('PARAMS.raidid')),
+                                                          array('order' => 'participation ASC'));        
 
                 $f3->set('registrations', $registrations); 
                 break;
             
             case 'registration':
-                $raidsView = $this->getDB('v_raids');
-                $raidinfo = $raidsView->findone('id='.$f3->get('PARAMS.raidid'));
+                $raidsDB = $this->getDB('raids');
+                $raid = $raidsDB->findone(array('id=?',$f3->get('PARAMS.raidid')));
                 
-                $f3->set('headTitle', $raidinfo->name);
-                $f3->set('headSubTitle', $raidinfo->players." Spieler (".$raidinfo->difficulty.")");                 
-                $f3->set('raidinfo', $raidinfo);
+                $f3->set('raid', $raid);
                 
-                $characterView = $this->getDB('v_characters');
-                $characterlist = $characterView->find('userid='.$f3->get('SESSION.user.id'), array('order' => 'armorclass DESC'));                
+                // Header
+                $raidinfo = $f3->get('game.raids.'.$raid->raidtypeid);
+                
+                $f3->set('headTitle', $raidinfo['name']);
+                $f3->set('headSubTitle', $raidinfo['players']." Spieler (".$raidinfo['difficulty'].")");                                 
+                
+                $charactersDB = $this->getDB('characters');
+                $characterlist = $charactersDB->find(array('userid=?',
+                                                           $f3->get('SESSION.user.id')), 
+                                                     array('order' => 'armorclass DESC'));                
                 
                 $f3->set('characterlist', $characterlist);
                 break;
             
-            case 'create':
-                $raidtypes = $this->getDB('raidtypes');
-                $result = $raidtypes->find("enabled=1");
-
-                $f3->set('raidtypes', $result);    
+            case 'create':  
                 break;
             
             case 'edit':
-                $raidsView = $this->getDB('v_raids');
-                $raid = $raidsView->findone('id = '.$f3->get('PARAMS.raidid'));
+            case 'delete':
+                $raidsDB = $this->getDB('raids');
+                $raid = $raidsDB->findone(array('id=?',$f3->get('PARAMS.raidid')));
                 
                 $f3->set('raid', $raid);
                 break;
             
-            case 'delete':
-                $raidsView = $this->getDB('v_raids');
-                $raid = $raidsView->findone('id = '.$f3->get('PARAMS.raidid'));
+            case 'invite':
+                $raidsDB = $this->getDB('raids');
+                $raid = $raidsDB->findone(array('id=?',$f3->get('PARAMS.raidid')));
                 
-                $f3->set('raid', $raid);                
-                break;
+                $f3->set('raid', $raid);
+                
+                $usersDB = $this->getDB('users');
+                $userlist = $usersDB->find();
+                
+                $f3->set('userlist', $userlist);
+                break;            
         }
     }
     
@@ -127,28 +147,31 @@ class RaidViewController extends ViewController
         switch ($f3->get('PARAMS.action')) {
             case 'registration':
                 $registrationDB = $this->getDB('registrations'); 
-                $registration = $registrationDB->findone('raidid = '.$f3->get('POST.raidid').
-                                                         ' AND characterid = '.$f3->get('POST.characterid'));
+                $registration = $registrationDB->findone(array('raidid=? AND characterid=?',
+                                                                $f3->get('POST.raidid'),
+                                                                $f3->get('POST.characterid')));
+                
+                if ($this->raidRegistrationForm->isValid($f3->get('POST')) && $registration) {      
 
-                if ($this->raidRegistrationForm->isValid($f3->get('POST')) && !$registration->dry()) {      
                     $registration->participation = $f3->get('POST.participation');
-                    $registration->text = $f3->get('POST.text');
+                    $registration->comment = $f3->get('POST.comment');
+                    $registration->role = $f3->get('POST.role');
                     $registration->save();     
                     
                     // Remove remaining Characters from the Registration-List
-                    $characterView = $this->getDB('v_characters');
-                    $remainingCharacters = $characterView->find('userid = '.$f3->get('SESSION.user.id').
-                                                                ' AND id != '.$f3->get('POST.characterid'));   
+                    //$characterDB = $this->getDB('characters');
+                    //$remainingCharacters = $characterDB->find(array('userid=? AND id!=?',
+                    //                                                 $f3->get('SESSION.user.id'),
+                    //                                                 $f3->get('POST.characterid')));   
                     
-                    foreach ($remainingCharacters as $character) {
-                        $registrationDB->erase('raidid = '.$f3->get('POST.raidid').
-                                               ' AND characterid = '.$character->id);
-                    }
-                                                          
-                    
-
-                } elseif ($registration->dry()) {
-                    $f3->set('SESSION.errormsg', 'Raid not found!');
+                    //foreach ($remainingCharacters as $character) {
+                    //    $registrationDB->erase(array('raidid=? AND characterid=?',
+                    //                                 $f3->get('POST.raidid'),
+                    //                                 $character->id));
+                    //}
+                    $f3->reroute('/raid/show/'.$f3->get('POST.raidid'));
+                } elseif (!$registration) {
+                    $f3->set('SESSION.errormsg', 'Raideinladung nicht gefunden!');
                     $f3->reroute('/raid/registration/'.$f3->get('PARAMS.raidid'));
                 } else {            
                     $f3->set('SESSION.failedFields', array_keys($this->raidRegistrationForm->getFailedFields()));
@@ -168,39 +191,38 @@ class RaidViewController extends ViewController
                     $raid->creationdate = date("Y-m-d H:i:s");
                     $raid->save();    
                     
-                    // Add available Characters to Raid
-                    $raidView = $this->getDB('v_raids');
-                    $newRaid = $raidView->findone('id = '. $raid->id);
+                    // Find Characters suitable for this Raid and add them
+                    $raidinfo = $f3->get('game.raids.'.$raid->raidtypeid);
                     
-                    // Find Characters suitable for this Raid
                     $charactersDB = $this->getDB('characters');
-                    $characters = $charactersDB->find('armorclass >= '. $newRaid->armorclass);
+                    $characters = $charactersDB->find(array('armorclass>=?',$raidinfo['armorclass']));
                     
                     $useridlist = array();
                     $registration= $this->getDB('registrations');
                     foreach ($characters as $character) {
-                        $registration->raidid = $newRaid->id;
+                        $registration->raidid = $raid->id;
                         $registration->characterid = $character->id;
                         $registration->save();
                         $registration->reset();
                         
                         $useridlist[] = $character->userid;
                     }
-
+                    
                     // Send Mail to user
-                    $f3->set('newRaid', $newRaid);
+                    $f3->set('raid', $raid);
+                    $raidinfo = $f3->get('game.raids.'.$f3->get('raid')->raidtypeid);
+                    $raidname = $raidinfo['name']." ".$raidinfo['players']." (".$raidinfo['difficulty'].")";       
+                    
                     $usersDB = $this->getDB('users');
                     
+                    $receiverlist = array();
                     foreach (array_unique($useridlist) as $userid) {
-                        $user = $usersDB->findone('id = '. $userid);
+                        $user = $usersDB->findone(array('id=?',$userid));
 
-                        $this->mail->sendMessage('raidnotification', $user->email);
+                        $receiverlist[] = $user->email;
                     }
-                    
-                    die;
-                    
-                    $this->mail->sendMessage($template, $to);
-                    
+
+                    $this->mail->setSubject('Raideinladung '.$raidname)->sendMessage('raidnotification', $receiverlist);
                     
                     $f3->reroute('/raid/list');
                 } else {
@@ -213,7 +235,7 @@ class RaidViewController extends ViewController
             case 'edit':
                 if ($this->raidEditForm->isValid($f3->get('POST'))) {
                     $raidDB = $this->getDB('raids');
-                    $raid = $raidDB->findone('id = '.$f3->get('POST.id'));
+                    $raid = $raidDB->findone(array('id=?',$f3->get('POST.id')));
                     
                     $datetime = date("Y-m-d H:i:s", strtotime($f3->get('POST.date').' '.$f3->get('POST.time')));
 
@@ -224,17 +246,41 @@ class RaidViewController extends ViewController
                 } else {
                     $f3->set('SESSION.failedFields', array_keys($this->raidEditForm->getFailedFields()));
                     $f3->set('SESSION.errormsg', implode("<br>", $this->raidEditForm->getFailedFields()));
-                    $f3->reroute('/raid/create');
+                    $f3->reroute('/raid/list');
                 }
                 break;     
                 
             case 'delete':
                 $raidsDB = $this->getDB('raids');
-                $raid = $raidsDB->findone('id = '.$f3->get('PARAMS.raidid'));
-
-                $raid->erase();
-
+                $raidsDB->erase(array('id=?',$f3->get('PARAMS.raidid')));
+                
+                $registrationsDB = $this->getDB('registrations');
+                $registrationsDB->erase(array('id=?',$f3->get('PARAMS.raidid')));
+                
                 $f3->reroute('/raid/list');                
+                break;
+            
+            case 'invite':
+                if ($this->raidInviteForm->isValid($f3->get('POST'))) {
+                    $usersDB = $this->getDB('users');
+                    $user = $usersDB->findone(array('id=?',$f3->get('POST.userid')));
+                    
+                    $raidsDB = $this->getDB('raids');
+                    $raid = $raidsDB->findone(array('id=?',$f3->get('PARAMS.raidid')));
+                    
+                    $f3->set('raid', $raid);
+                    $raidinfo = $f3->get('game.raids.'.$f3->get('raid')->raidtypeid);
+                    $raidname = $raidinfo['name']." ".$raidinfo['players']." (".$raidinfo['difficulty'].")";                    
+
+                    // Send Mail
+                    $this->mail->setSubject('Raideinladung '.$raidname)->sendMessage('raidnotification', array($user->email));   
+                    
+                    $f3->reroute('/raid/list');
+                } else {
+                    $f3->set('SESSION.failedFields', array_keys($this->raidInviteForm->getFailedFields()));
+                    $f3->set('SESSION.errormsg', implode("<br>", $this->raidInviteForm->getFailedFields()));
+                    $f3->reroute('/raid/invite/'.$f3->get('PARAMS.raidid'));
+                }                
                 break;
         }        
     }   

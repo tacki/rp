@@ -34,10 +34,14 @@ class UserEditForm extends Form
             'password' => array(
                 'type' => 'string',
                 'required' => true,
+                'min' => 6,
+                'max' => 32,                
             ),
             'password2' => array(
                 'type' => 'string',
                 'required' => true,
+                'min' => 6,
+                'max' => 32,                
             ),
             'submit' => array(
                 'type' => 'submit',

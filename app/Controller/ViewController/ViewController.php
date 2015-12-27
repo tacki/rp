@@ -19,6 +19,7 @@
 namespace Controller\ViewController;
 
 use DB\SQL\Mapper; 
+use Controller\ServiceController\SecurityServiceController;
 
 class ViewController
 {    
@@ -26,46 +27,41 @@ class ViewController
      * @var DB\SQL
      */
     public $db;    
-       
+    
+    /**
+     * @var SecurityServiceController 
+     */
+    protected $security;
+    
     public function __construct()
     {
         $this->db = \Base::instance()->get('DB');
+        $this->security = new SecurityServiceController;
     }
     
     public function beforeroute()
     {
         $f3 = \Base::instance();
-        $isPublicRoute = false;
-        $isRaidleadRoute = false;
+        
+        // params checking
+        if(!$this->security->checkParams()) {
+            // Bad Parameter - possible hacking attempt
+            $f3->set('SESSION.errormsg', 'Bad Parameter!');
+            $f3->reroute('/');                
+        }
         
         // access control
-        // public pages
-        foreach($f3->get('access.ALLOWPUBLIC') as $publicroute) {
-            if (preg_match("/^".$publicroute."$/", $f3->get('PATTERN')) ||
-                preg_match("/^".$publicroute."$/", $f3->get('PATH'))) {
-                $isPublicRoute = true;
-                break;
-            }
-        }
-        
-        if (!$isPublicRoute && !$f3->get('SESSION.user')) {
-            // Not a public page and user is not logged in
-            $f3->set('SESSION.errormsg', 'Not Authenticated!');
+        // public routes
+        if (!$this->security->isPublicRoute() && !$f3->get('SESSION.user')) {
+            // Not a public route and user is not logged in
+            $f3->set('SESSION.errormsg', 'Nicht authentifiziert!');
             $f3->reroute('/auth/reroute?url='.urlencode($f3->get('PATH')));
         }
-
-        // raidlead pages
-        foreach($f3->get('access.ALLOWRAIDLEAD') as $raidleadroute) {
-            if (preg_match("/^".$raidleadroute."$/", $f3->get('PATTERN')) ||
-                preg_match("/^".$raidleadroute."$/", $f3->get('PATH'))) {
-                $isRaidleadRoute = true;
-                break;
-            }
-        }        
         
-        if ($isRaidleadRoute && !$f3->get('SESSION.user.raidleader')) {
+        // raidleader routes
+        if ($this->security->isRaidleaderRoute() && !$f3->get('SESSION.user.raidleader')) {
             // A raidlead-page and user is not a raidleader
-            $f3->set('SESSION.errormsg', 'Not Allowed!');
+            $f3->set('SESSION.errormsg', 'Nicht erlaubt!');
             $f3->reroute('/raid/list');
         }
     }
@@ -78,9 +74,7 @@ class ViewController
 
         $calledClass = substr(end($classPath), 0, strpos(end($classPath), "Controller"));
         
-        $action = $f3->get('VERB');
-        
-        $f3->set('content',$calledClass.'\\'.strtolower($action).'.phtml');
+        $f3->set('content',$calledClass.'\\'.$calledClass.'.phtml');
         
         // Render HTML layout
         echo \View::instance()->render('layout.phtml');

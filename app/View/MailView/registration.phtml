@@ -1,9 +1,17 @@
-Hello!
+<?php $f3 = \Base::instance() ?>
 
-Willkommen beim RaidPlaner
-
-klicke auf diesen Link um deinen Benutzer zu aktivieren
-<a href="/user/mailvalidation/<?php echo \Base::instance()->get('newuser')->id . "/" . \Base::instance()->get('newuser')->mailvalidation ?>">
-    /user/mailvalidation<?php echo \Base::instance()->get('newuser')->id . "/" . \Base::instance()->get('newuser')->mailvalidation ?>
-</a>
+<html>
+    <body>
+        Hallo!<br>
+        <br>
+        Willkommen beim RaidPlaner von <?php echo $f3->get('GUILDNAME') ?>!<br>
+        <br>
+        Klicke auf diesen Link um deinen Benutzer zu aktivieren<br>
+        <a href="<?php echo $f3->get('HOSTBASEURL') ?>/user/mailvalidation/<?php echo $f3->get('newuser')->id . "/" . $f3->get('newuser')->mailvalidation ?>">
+            <?php echo $f3->get('HOSTBASEURL') ?>/user/mailvalidation/<?php echo $f3->get('newuser')->id . "/" . $f3->get('newuser')->mailvalidation ?>
+        </a><br>
+        <br>
+        <?php echo $f3->get('GUILDNAME') ?>
+    </body>
+</html>
     

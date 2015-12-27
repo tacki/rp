@@ -9,6 +9,10 @@
     $f3->config('../app/config/config.ini');
     $f3->config('../app/config/routing.ini');
     
+    // load Game specification
+    $spec = include '../app/config/specifications/'.$f3->get('SPECIFICATION').'.php';
+    $f3->set('game', $spec);
+    
     // Database init
     $connstr = $f3->get('database.TYPE').":".
                "host=".$f3->get('database.HOST').";".

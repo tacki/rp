@@ -24,7 +24,7 @@ class CharacterEditForm extends Form
     {
         return array(
             'id' => array(
-                'type' => 'id',
+                'type' => 'numeric',
                 'required' => true,
             ),
             'name' => array(
@@ -35,9 +35,14 @@ class CharacterEditForm extends Form
                 'type' => 'string',
                 'required' => true,
             ),
+            'role' => array(
+                'type' => 'numeric',
+                'required' => false,
+            ),
             'armorclass' => array(
-                'type' => 'int',
+                'type' => 'numeric',
                 'required' => true,
+                'min' => 1,
             ),
             'submit' => array(
                 'type' => 'submit',

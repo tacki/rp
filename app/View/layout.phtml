@@ -2,10 +2,14 @@
 <html lang="en">
     <head>
         <meta charset="<?php echo $ENCODING; ?>" />
-        <title>RP</title>
+        <title>RaidPlaner</title>
         <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css" />
+        <link rel="stylesheet" href="/css/calendar.min.css" type="text/css" />
         <script src="/js/jquery.min.js"></script>
         <script src="/js/bootstrap.min.js"></script>
+        <script src="/js/underscore.min.js"></script>
+        <script src="/js/language/de-DE.js"></script>
+        <script src="/js/calendar.min.js"></script>
     </head>
     <body>
         <font face="Arial">
@@ -26,32 +30,33 @@
                         <ul class="nav navbar-nav">
                             <li><a href="/">Home <span class="sr-only">(current)</span></a></li>
                             <?php if(\Base::instance()->get('SESSION.user')) : ?>
+                            <li><a href="/calendar">Kalender <span class="sr-only">(current)</span></a></li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Character <span class="caret"></span></a>
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Charakter <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
-                                    <li><a href="/character/create">Create</a></li>
-                                    <li><a href="/character/list">List</a></li>
+                                    <li><a href="/character/create">Erstellen</a></li>
+                                    <li><a href="/character/list">Liste</a></li>
                                 </ul>
                             </li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Raid <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
                                     <?php if(\Base::instance()->get('SESSION.user.raidleader')) : ?>
-                                    <li><a href="/raid/create">Create</a></li>
+                                    <li><a href="/raid/create">Erstellen</a></li>
                                     <?php endif ?>
-                                    <li><a href="/raid/list">List</a></li>
+                                    <li><a href="/raid/list">Liste</a></li>
                                 </ul>
                             </li>      
                             <?php if(\Base::instance()->get('SESSION.user.admin')) : ?>                            
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
-                                    <li><a href="/user/list">Userlist</a></li>
+                                    <li><a href="/user/list">Benutzerliste</a></li>
                                 </ul>
                             </li>     
                             <?php endif ?>
                             <?php else : ?>
-                            <li><a href="/user/create">Register User <span class="sr-only">(current)</span></a></li>
+                            <li><a href="/user/create">Benutzer registrieren <span class="sr-only">(current)</span></a></li>
                             <?php endif ?>
                         </ul>
                             
@@ -63,8 +68,8 @@
                               <span class="sr-only">Toggle Dropdown</span>
                             </button>
                             <ul class="dropdown-menu">
-                              <li><a href="/user/edit/<?php echo \Base::instance()->get('SESSION.user.id') ?>">Edit</a></li>
-                              <li><a href="/logout">Logout</a></li>
+                              <li><a href="/user/edit/<?php echo \Base::instance()->get('SESSION.user.id') ?>">Anpassen</a></li>
+                              <li><a href="/auth/logout">Logout</a></li>
                             </ul>
                         </div>
                         <?php else : ?>
@@ -80,7 +85,35 @@
                 <small><?php echo \Base::instance()->get('headSubTitle'); ?></small>
             </h1>
             
+            <?php if (\Base::instance()->get('SESSION.errormsg') != "") : ?>
+            <div class="alert alert-danger">
+                <i class="glyphicon glyphicon-exclamation-sign"></i><strong>Error!</strong><br>
+                <?php 
+                    echo \Base::instance()->get('SESSION.errormsg');
+                    \Base::instance()->clear('SESSION.errormsg');
+                ?>
+            </div>
+            <?php endif ?>
+            <?php if (\Base::instance()->get('SESSION.successmsg') != "") : ?>
+            <div class="alert alert-success">
+                <i class="glyphicon glyphicon-ok"></i> <strong>OK!</strong><br>
+                <?php 
+                    echo \Base::instance()->get('SESSION.successmsg');
+                    \Base::instance()->clear('SESSION.successmsg');
+                ?>
+            </div>
+            <?php endif ?>            
+            
             <?php echo $this->render(Base::instance()->get('content')); ?>
+            
+            <?php if (is_array(\Base::instance()->get('SESSION.failedFields'))) : ?>
+            <script>
+                <?php foreach (\Base::instance()->get('SESSION.failedFields') as $fieldname) : ?>
+                $("#<?php echo $fieldname ?>").parent().addClass('has-error');
+                <?php endforeach; ?>
+                <?php \Base::instance()->clear('SESSION.failedFields'); ?>
+            </script>
+            <?php endif ?>            
         </div>
         </font>
     </body>

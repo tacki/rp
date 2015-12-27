@@ -1,9 +1,20 @@
-Hello!
-
-du wurdest zu einem Raid eingeladen!
-
-klicke auf diesen Link um deine Einladung zu bestätigen
-<a href="/raid/registration/<?php echo \Base::instance()->get('newRaid')->id ?>">
-    /raid/registration/<?php echo \Base::instance()->get('newRaid')->id ?>
-</a>
+<?php $f3 = \Base::instance() ?>
+<?php 
+    $raidinfo = $f3->get('game.raids.'.$f3->get('raid')->raidtypeid);
+    $raidname = $raidinfo['name']." ".$raidinfo['players']." (".$raidinfo['difficulty'].")";
+?>
+<html>
+    <body>
+        Hallo!<br>
+        <br>
+        Du wurdest von <?php echo $f3->get('GUILDNAME') ?> zu einem <?php echo $raidname ?> Raid eingeladen!<br>
+        <br>
+        Klicke auf diesen Link um deine Einladung zu bestätigen und einen Platz zu reservieren<br>
+        <a href="<?php echo $f3->get('HOSTBASEURL') ?>/raid/registration/<?php echo $f3->get('raid')->id ?>">
+            <?php echo $f3->get('HOSTBASEURL') ?>/raid/registration/<?php echo $f3->get('raid')->id ?>
+        </a><br>
+        <br>
+        <?php echo $f3->get('GUILDNAME') ?>
+    </body>
+</html>
 

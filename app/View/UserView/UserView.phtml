@@ -1,0 +1,139 @@
+<?php $f3 = \Base::instance() ?>
+
+<?php if ($f3->get('PARAMS.action') == "list") : ?>
+<div class="table-responsive">
+<table class="table table-bordered table-hover table-condensed table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>EMail</th>
+            <th>Charaktere</th>
+            <th>Mailvalidierung</th>
+            <th>Raidleader</th>
+            <th>Admin</th>
+            <th></th>
+        </tr>
+    </thead>
+    
+    <tbody>
+<?php foreach ($f3->get('users') as $user):?>
+    <tr>
+        <td><?php echo $user->id ?></td>
+        <td><?php echo $user->email ?></td>
+        <td>
+            <ul>
+        <?php foreach($f3->get('characters') as $character) : ?>
+            <?php if($character->userid == $user->id) : ?>
+                <li><?php echo $character->name ?></li>
+            <?php endif ?>
+        <?php endforeach ?>
+            </ul>                
+        </td>
+        <?php if($user->mailvalidation) : ?>
+        <td><i class="glyphicon glyphicon-remove"></i></td>  
+        <?php else : ?>
+        <td><i class="glyphicon glyphicon-ok"></i></td> 
+        <?php endif ?>
+        <?php if($user->raidleader) : ?>
+        <td><i class="glyphicon glyphicon-ok"></i></td>  
+        <?php else : ?>
+        <td><i class="glyphicon glyphicon-remove"></i></td> 
+        <?php endif ?> 
+        <?php if($user->admin) : ?>
+        <td><i class="glyphicon glyphicon-ok"></i></td>  
+        <?php else : ?>
+        <td><i class="glyphicon glyphicon-remove"></i></td> 
+        <?php endif ?>          
+        <td>
+            <a class="btn btn-warning btn-sm" href="/user/edit/<?php echo $user->id ?>" role="button">
+                <i class="glyphicon glyphicon-pencil"></i> Ändern
+            </a>
+            <a class="btn btn-danger btn-sm" href="/user/delete/<?php echo $user->id ?>" role="button">
+                <i class="glyphicon glyphicon-remove"></i> Löschen
+            </a>
+        </td>      
+    </tr>
+<?php endforeach;?>   
+    </tbody>
+    
+    <tfoot>
+        <tr>
+            <td colspan="6">&nbsp;</td>
+        </tr>
+    </tfoot>
+</table>
+</div>
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == "create") : ?>
+<div class="well bs-component col-md-4 col-lg-4">
+    <legend>Benutzer registrieren</legend>
+    <form action=""  method="POST" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label for="email" class="control-label">EMail</label> 
+
+            <input type="email" name="email" id="email" placeholder="user@example.com" class="form-control"> 
+        </div>  
+        
+        <div class="form-group">
+            <label for="password" class="control-label">Passwort</label> 
+
+            <input type="password" name="password" id="password" placeholder="Passwort" class="form-control" required>        
+        </div>    
+        
+        <div class="form-group">
+            <label for="password2" class="control-label">Password bestätigen</label> 
+
+            <input type="password" name="password2" id="password2" placeholder="Passwort bestätigen" class="form-control" required>        
+        </div>         
+
+        <input type="submit" name="submit" class="btn btn-primary" value="Registrieren"> 
+    </form>
+</div>
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == "edit") : ?>
+<div class="well bs-component col-md-4 col-lg-4">
+    <legend>Benutzer ändern</legend>
+    <form action=""  method="POST" enctype="multipart/form-data">
+
+        <input type="hidden" name="id" value="<?php echo $f3->get('user')->id ?>">
+        
+        <div class="form-group">
+            <label for="email" class="control-label">EMail</label> 
+
+            <input type="text" name="email" id="name" value="<?php echo $f3->get('user')->email ?>" class="form-control" readonly>        
+        </div>    
+        
+        <div class="form-group">
+            <label for="password" class="control-label">Passwort</label>    
+
+            <input type="password" name="password" id="password" placeholder="Neues Passwort" class="form-control"> 
+        </div>          
+
+        <div class="form-group">
+            <label for="password2" class="control-label">Confirm Password</label>    
+
+            <input type="password" name="password2" id="password2" placeholder="Neues Passwort bestätigen" class="form-control"> 
+        </div>   
+
+        <input type="submit" name="submit" class="btn btn-primary" value="Ändern"> 
+    </form>
+</div>
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == "delete") : ?>
+<p>Lösche Benutzer <?php echo $f3->get('user')->email ?> und die folgenden Charaktere?</p>
+<ul>
+    <?php foreach ($f3->get('characters') as $character) : ?>
+    <li><?php echo $character->name ?></li>
+    <?php endforeach ?>
+</ul>
+
+<form action=""  method="POST" enctype="multipart/form-data">
+    <input type="submit" name="submit" class="btn btn-danger" value="Löschen">
+    <a class="btn btn-primary" href="/user/list" role="button">Zurück</a>
+</form>
+<?php endif ?>
+    

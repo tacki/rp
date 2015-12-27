@@ -44,56 +44,41 @@ class CharacterViewController extends ViewController
     public function get($f3)
     {
         if($f3->get('PARAMS.characterid') && !$this->editOrViewAllowed($f3->get('PARAMS.characterid'))) {
-            $f3->set('SESSION.errormsg', 'Not Allowed!');
+            $f3->set('SESSION.errormsg', 'Nicht erlaubt!');
             $f3->reroute('/character/list');
         }
         
         switch ($f3->get('PARAMS.action')) {
-            default:
             case 'list':
-                $characterView = $this->getDB('v_characters');
-                $characters = $characterView->find('userid = '.$f3->get('SESSION.user.id'));
+                $characterDB = $this->getDB('characters');
+                $characters = $characterDB->find(array('userid=?',$f3->get('SESSION.user.id')));
                 
                 $f3->set('characters', $characters);
                 break;
 
             case 'create':
-                $characterTypesDB = $this->getDB('charactertypes');
-                $characterTypes = $characterTypesDB->find();
-
-                $f3->set('characterTypes', $characterTypes);
-                
-                $raidtypeDB = $this->getDB('raidtypes');
-                $armorClasses = $raidtypeDB->select("DISTINCT armorclass", null, array('order'=>'armorclass ASC'));
-                
-                $f3->set('armorClasses', $armorClasses);
                 break;  
 
             case 'edit':
-                $characterView = $this->getDB('v_characters');
-                $character = $characterView->findone('id = '.$f3->get('PARAMS.characterid'));
+                $characterDB = $this->getDB('characters');
+                $character = $characterDB->findone(array('id=?',$f3->get('PARAMS.characterid')));
                 
-                $f3->set('character', $character);
-                
-                $raidtypeDB = $this->getDB('raidtypes');
-                $armorClasses = $raidtypeDB->select("DISTINCT armorclass", null, array('order'=>'armorclass ASC'));
-                
-                $f3->set('armorClasses', $armorClasses);                
+                $f3->set('character', $character);                               
                 break;   
             
             case 'delete':
-                $characterView = $this->getDB('v_characters');
-                $character = $characterView->findone('id = '.$f3->get('PARAMS.characterid'));
+                $characterDB = $this->getDB('characters');
+                $character = $characterDB->findone(array('id=?',$f3->get('PARAMS.characterid')));
                 
                 $f3->set('character', $character);
-                break;                
+                break;   
         }
     }
     
     public function post($f3)
     {
         if($f3->get('PARAMS.characterid') && !$this->editOrViewAllowed($f3->get('PARAMS.characterid'))) {
-            $f3->set('SESSION.errormsg', 'Not Allowed!');
+            $f3->set('SESSION.errormsg', 'Nicht erlaubt!');
             $f3->reroute('/character/list');
         }        
         
@@ -101,7 +86,13 @@ class CharacterViewController extends ViewController
             case 'create':        
                 $newCharacter = $this->getDB('characters');        
 
-                if ($this->characterRegistrationForm->isValid($f3->get('POST'))) {      
+                if ($this->characterRegistrationForm->isValid($f3->get('POST'))) {    
+                    $characterDB = $this->getDB('characters');
+                    if ($characterDB->findone(array('name=?',$f3->get('POST.name')))) {
+                        $f3->set('SESSION.errormsg', 'Charaktername ungültig oder bereits registriert!');
+                        $f3->reroute('/character/create');
+                    }                    
+                    
                     $newCharacter->copyfrom('POST');
                     $newCharacter->userid = $f3->get('SESSION.user.id');
                     $newCharacter->save();   
@@ -118,9 +109,13 @@ class CharacterViewController extends ViewController
                 $characterid = $f3->get('PARAMS.characterid');
                     
                 $characterDB = $this->getDB('characters');
-                $character = $characterDB->findone('id = '.$characterid);
+                $character = $characterDB->findone(array('id=?',$characterid));
                 
-                if ($this->characterEditForm->isValid($f3->get('POST'))) {      
+                if ($this->characterEditForm->isValid($f3->get('POST'))) { 
+                    if ($f3->get('POST.role')) {
+                        // Role is optional
+                        $character->role = $f3->get('POST.role');
+                    }
                     $character->armorclass = $f3->get('POST.armorclass');
                     $character->save();       
                     
@@ -128,13 +123,13 @@ class CharacterViewController extends ViewController
                 } else {            
                     $f3->set('SESSION.failedFields', array_keys($this->characterEditForm->getFailedFields()));
                     $f3->set('SESSION.errormsg', implode("<br>", $this->characterEditForm->getFailedFields()));
-                    $f3->reroute('/character/list');
+                    $f3->reroute('/character/edit/'.$characterid);
                 }       
                 break;   
                 
             case 'delete':
                 $characterDB = $this->getDB('characters');
-                $character = $characterDB->findone('id = '.$f3->get('PARAMS.characterid'));
+                $character = $characterDB->findone(array('id=?',$f3->get('PARAMS.characterid')));
 
                 $character->erase();
 
@@ -149,6 +144,6 @@ class CharacterViewController extends ViewController
         
         $characterDB = $this->getDB('characters');
         
-        return (bool)($characterDB->findone('userid = '.$f3->get('SESSION.user.id').' AND id = '.$characterid));
+        return (bool)($characterDB->findone(array('userid=? AND id=?',$f3->get('SESSION.user.id'),$characterid)));
     }
 }

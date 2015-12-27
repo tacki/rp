@@ -40,6 +40,14 @@ abstract class Form
             return false;
         }
         
+        // Check if all required Fields are posted
+        foreach ($this->getFormFields() as $name => $formField) {
+            if ($formField['required'] && !isset($post[$name])) {
+                $this->failedFields[$name] = "Missing Data";
+            }
+        } 
+        
+        // Check if all given 
         foreach ($post as $name=>$value) {
             $this->check($name, $value);
         }
@@ -73,7 +81,7 @@ abstract class Form
             return false;
         }
                
-        if ($formFields[$name]['required'] && !(bool)$value) {
+        if ($formFields[$name]['required'] && $value === NULL) {
             $this->failedFields[$name] = "invalid data (empty field)";
             return false;
         }        
@@ -85,6 +93,16 @@ abstract class Form
                     $this->failedFields[$name] = "invalid data (not a string)";
                     return false;
                 }
+                
+               if (isset($formFields[$name]['min']) && strlen($value) < $formFields[$name]['min']) {
+                    $this->failedFields[$name] = "invalid data (too short - min. {$formFields[$name]['min']} characters)";
+                    return false;
+                }    
+                
+               if (isset($formFields[$name]['max']) && strlen($value) > $formFields[$name]['max']) {
+                    $this->failedFields[$name] = "invalid data (too long - max. {$formFields[$name]['max']} characters)";
+                    return false;
+                }                
                 break;
             case 'bool':
                 if (!filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) !== NULL) {
@@ -92,11 +110,21 @@ abstract class Form
                     return false;                    
                 }
                 break;                
-            case 'numeric':
+            case 'numeric':              
                 if (!filter_var($value, FILTER_VALIDATE_INT)) {
                     $this->failedFields[$name] = "invalid data (not a number)";
                     return false;                    
                 }
+
+                if (isset($formFields[$name]['min']) && $value < $formFields[$name]['min']) {
+                    $this->failedFields[$name] = "invalid data (number out of range)";
+                    return false;
+                }
+                
+                if (isset($formFields[$name]['max']) && $value > $formFields[$name]['max']) {
+                    $this->failedFields[$name] = "invalid data (number out of range)";
+                    return false;
+                }                
                 break;
             case 'date':
                 if (!$this->validateDate($value, 'd.m.Y')) {

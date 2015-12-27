@@ -27,12 +27,16 @@ class CharacterRegistrationForm extends Form
                 'type' => 'string',
                 'required' => true,
             ),
-            'charactertypeid' => array(
-                'type' => 'int',
+            'class' => array(
+                'type' => 'numeric',
+                'required' => true,
+            ),
+            'role' => array(
+                'type' => 'numeric',
                 'required' => true,
             ),
             'armorclass' => array(
-                'type' => 'int',
+                'type' => 'numeric',
                 'required' => true,
             ),
             'submit' => array(

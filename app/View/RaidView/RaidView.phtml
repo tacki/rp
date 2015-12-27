@@ -1,0 +1,327 @@
+<?php $f3 = \Base::instance() ?>
+
+<?php if ($f3->get('PARAMS.action') == 'list') : ?>
+<div class="table-responsive">
+<table class="table table-bordered table-hover table-condensed table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Spieler</th>
+            <th>Schwierigkeit</th>
+            <th>Rüstwert</th>
+            <th>Zeitpunkt</th>
+            <?php if ($f3->get('SESSION.user.raidleader')) : ?>
+            <th></th>
+            <?php endif ?>
+        </tr>
+    </thead>
+    
+    <tbody>
+<?php foreach ($f3->get('raidlist') as $raid):?>
+    <tr id="<?php echo $raid->id ?>">
+        <td><?php echo ++$i ?></td>
+        <td><?php echo $f3->get("game.raids.{$raid->raidtypeid}.name") ?></td>
+        <td><?php echo $f3->get("game.raids.{$raid->raidtypeid}.players") ?></td>     
+        <td><?php echo $f3->get("game.raids.{$raid->raidtypeid}.difficulty") ?></td>   
+        <td><?php echo $f3->get("game.armorclasses.".$f3->get("game.raids.{$raid->raidtypeid}.armorclass")) ?></td>    
+        <td><?php echo date("d.m.Y H:i", strtotime($raid->datetime)) ?></td> 
+        <?php if ($f3->get('SESSION.user.raidleader')) : ?>
+        <td>
+            <a class="btn btn-warning btn-sm" href="/raid/edit/<?php echo $raid->id ?>" role="button">
+                <i class="glyphicon glyphicon-pencil"></i> Ändern
+            </a>
+            <a class="btn btn-danger btn-sm" href="/raid/delete/<?php echo $raid->id ?>" role="button">
+                <i class="glyphicon glyphicon-remove"></i> Löschen
+            </a>
+
+            <a class="btn btn-info btn-sm" href="/raid/invite/<?php echo $raid->id ?>" role="button">
+                <i class="glyphicon glyphicon-envelope"></i> Extraeinladung
+            </a>
+        </td> 
+        <?php endif ?>
+    </tr>
+<?php endforeach;?>   
+    </tbody>
+
+</table>
+</div>
+
+<script>
+    $('tr').click(function() {
+        var href = "/raid/show/" + $(this).attr("id");
+        if(href) {
+            window.location = href;
+        }
+    });
+</script>
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == 'show') : ?>
+<div class="table-responsive">
+<table class="table table-bordered table-hover table-condensed">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Klasse</th>
+            <th>Rolle</th>
+            <th>Kommentar</th>
+            <th>Teilnahme</th>
+        </tr>
+    </thead>
+    
+    <tbody>
+<?php foreach ($f3->get('registrations') as $registration):?>
+    <?php if ($registration->participation === 1) : ?>
+    <tr class="success">
+    <?php elseif ($registration->participation === 2) : ?>  
+    <tr class="warning">
+    <?php elseif ($registration->participation === 3) : ?>  
+    <tr class="danger"> 
+    <?php else : ?>        
+    <tr>
+    <?php endif ?>
+        <td><?php echo ++$i ?></td>
+        <td><?php echo $registration->charactername ?></td>
+        <td><?php echo $f3->get("game.classes.{$registration->characterclass}.name") ?></td>
+        <td><?php echo $f3->get("game.roles.{$registration->role}") ?></td>
+        <td><?php echo $registration->comment ?></td>   
+    <?php if ($registration->participation === 1) : ?>        
+        <td><span class="glyphicon glyphicon-ok" aria-hidden="true"></td>
+    <?php elseif ($registration->participation === 2) : ?>
+        <td></td>
+    <?php elseif ($registration->participation === 3) : ?>  
+        <td><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></td>
+    <?php else : ?> 
+        <td></td>        
+    <?php endif; ?>        
+    </tr>
+<?php endforeach;?>   
+    </tbody>
+    
+</table>
+</div>
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == 'registration') : ?>
+<div class="well bs-component col-md-4 col-lg-4">
+    <legend>Raidanmeldung</legend>
+    <form action=""  method="POST" enctype="multipart/form-data">
+
+        <input type="hidden" name="raidid" value="<?php echo $f3->get('raid')->id ?>" hidden>
+
+        <div class="form-group">
+            <label for="datetime" class="control-label">Datum</label>
+
+            <input type="datetime" id="datetime" name="datetime" value="<?php echo date("d.m.Y H:i", strtotime($f3->get('raid')->datetime)) ?>" class="form-control" readonly>
+        </div>        
+        
+         <div class="form-group">    
+            <label class="control-label">Charakter</label>
+
+            <?php foreach ($f3->get('characterlist') as $character) : ?>
+            <div class="radio">
+                <label><input type="radio" name="characterid" value='<?php echo $character->id ?>'><?php echo $character->name ?></label>
+            </div>        
+            <?php endforeach ?>
+        </div>       
+        
+        <div class="form-group" id="roles" hidden>    
+            <label class="control-label">Rolle</label>
+            <?php foreach ($f3->get('game.roles') as $id=>$role) : ?>
+            <div class="radio">
+                <label><input type="radio" name="role" value='<?php echo $id ?>'><?php echo $role ?></label>
+            </div>      
+            <?php endforeach ?> 
+        </div>
+
+        <div class="form-group">    
+            <label class="control-label">Teilnahme</label>
+
+            <div class="radio">
+                <label><input type="radio" name="participation" value='1' checked>Ja</label>
+            </div>        
+            <div class="radio">
+                <label><input type="radio" name="participation" value='3'>Nein</label>
+            </div>  
+            <div class="radio">
+                <label><input type="radio" name="participation" value='2'>Eventuell</label>
+            </div> 
+        </div>
+
+        <div class="form-group">    
+            <label for="comment" class="control-label">Bemerkung</label>
+
+            <input type="time" name="comment" id="comment" placeholder="Einschränkung, Hinweis, etc." class="form-control">   
+        </div>        
+
+        <input type="submit" name="submit" class="btn btn-primary" value="Anmelden"> 
+    </form>
+</div>
+
+<script>
+$(function () {
+    $('input[name=characterid]').change(function () {
+        $.ajax({
+            url: "/api/character/getrole/"+$(this).val(), 
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',            
+            success: function(result){
+                $('input[name=role]').removeAttr("checked");
+                $('input[name=role][value='+result+']').prop("checked",true);
+                if(parseInt(result) === 3) {
+                    $('#roles').show();
+                } else {
+                    $('#roles').hide();
+                }
+            }
+        });        
+    });
+});    
+</script>
+
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == 'create') : ?>
+<div class="well bs-component col-md-4 col-lg-4">
+    <legend>Raid erstellen</legend>
+    <form action=""  method="POST" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label for="raidtypeid" class="control-label">Raid</label>
+
+            <select name="raidtypeid" id="raidtypeid" class="form-control">
+            <?php foreach ($f3->get('game.raids') as $id=>$raid):?>
+                <option value="<?php echo $id ?>">
+                    <?php echo $raid['name']." ".$raid['players']." (".$raid['difficulty'].")" ?>
+                </option>
+            <?php endforeach; ?>    
+            </select>
+        </div>
+
+        <div class="form-group">     
+            <label for="date" class="control-label">Datum</label>
+
+            <input type="date" name="date" id="date" placeholder="<?php echo date('d.m.Y'); ?>" class="form-control" value="<?php echo date('d.m.Y'); ?>" required>    
+        </div>
+
+        <div class="form-group">
+            <label for="time" class="control-label">Zeit</label>
+
+            <input type="time" name="time" id="time" placeholder="20:00" class="form-control" value="20:00" required>    
+        </div>
+
+        <input type="submit" name="submit" class="btn btn-primary" value="Erstellen"> 
+    </form>
+</div>    
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == 'edit') : ?>
+<?php 
+    $raidinfo = $f3->get('game.raids.'.$f3->get('raid')->raidtypeid);
+    $raidname = $raidinfo['name']." ".$raidinfo['players']." (".$raidinfo['difficulty'].")";
+?>
+<div class="well bs-component col-md-4 col-lg-4">
+    <legend>Raid ändern</legend>
+    <form action=""  method="POST" enctype="multipart/form-data">
+        
+        <input type="hidden" name="id" value="<?php echo $f3->get('raid')->id ?>">
+
+        <div class="form-group">
+            <label for="raidtypeid" class="control-label">Raid</label>
+
+            <input name="raidtypeid" id="raidtypeid" class="form-control" value="<?php echo $raidname ?>" readonly>
+        </div>
+
+        <div class="form-group">     
+            <label for="date" class="control-label">Datum</label>
+
+            <input type="date" name="date" id="date" placeholder="<?php echo date('d.m.Y'); ?>" class="form-control" value="<?php echo date('d.m.Y'); ?>" required>    
+        </div>
+
+        <div class="form-group">
+            <label for="time" class="control-label">Zeit</label>
+
+            <input type="time" name="time" id="time" placeholder="20:00" class="form-control" value="20:00" required>    
+        </div>
+
+        <input type="submit" name="submit" class="btn btn-primary" value="Ändern"> 
+    </form>
+</div>
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == 'delete') : ?>
+<?php 
+    $raidinfo = $f3->get('game.raids.'.$f3->get('raid')->raidtypeid);
+    $raidname = $raidinfo['name']." ".$raidinfo['players']." (".$raidinfo['difficulty'].")";
+?>
+<p>Lösche Raid <?php echo $raidname ?>?</p>
+<form action=""  method="POST" enctype="multipart/form-data">
+    <input type="submit" name="submit" class="btn btn-danger" value="Delete">
+    <a class="btn btn-primary" href="/raid/list" role="button">Back</a>
+</form>
+<?php endif ?>
+
+<?php if ($f3->get('PARAMS.action') == 'invite') : ?>
+<?php 
+    $raidinfo = $f3->get('game.raids.'.$f3->get('raid')->raidtypeid);
+    $raidname = $raidinfo['name']." ".$raidinfo['players']." (".$raidinfo['difficulty'].")";
+?>
+<div class="well bs-component col-md-4 col-lg-4">
+    <legend>Benutzer einladen</legend>
+    <form action=""  method="POST" enctype="multipart/form-data">
+        
+        <input type="hidden" name="id" value="<?php echo $f3->get('raid')->id ?>">
+
+        <div class="form-group">
+            <label for="raidname" class="control-label">Raid</label>
+
+            <input name="raidname" id="raidname" class="form-control" value="<?php echo $raidname ?>" readonly>
+        </div>
+
+        <div class="form-group">
+            <label for="userid" class="control-label">Email</label>
+
+            <select name="userid" id="userid" class="form-control">
+                <?php foreach($userlist as $user) :?>
+                <option value="<?php echo $user->id ?>"><?php echo $user->email ?></option>
+                <?php endforeach ?>
+            </select>
+        </div>
+        
+        <div class="form-group" id="characterlist">
+            <label for="characters" class="control-label">Charaktere</label>
+            
+            <ul id="characters">
+            </ul>
+        </div>
+
+        <input type="submit" name="submit" class="btn btn-primary" value="Einladung senden"> 
+    </form>
+</div>
+
+<script>
+$(function () {
+    $("#userid").change(function () {
+        $.ajax({
+            url: "/api/user/getcharacters/"+$(this).val(), 
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',            
+            success: function(result){
+                var html='';
+
+                result.forEach(function(value) {
+                    html = html+"<li>"+value+"</li>";
+                });
+                $('#characters').html(html);
+            }
+        });
+    });
+    
+    // Fire on onload
+    $("#userid").change();    
+});    
+</script>
+<?php endif; ?>
+

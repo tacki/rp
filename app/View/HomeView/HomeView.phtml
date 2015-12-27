@@ -1,0 +1,19 @@
+<?php $f3 = \Base::instance() ?>
+
+<div class="jumbotron">
+    <h1>RaidPlaner</h1>
+<?php if ($f3->get('SESSION.user')) : ?>
+    <p>Willkommen beim Raidplaner von <?php echo $f3->get('GUILDNAME') ?>.</p>
+    <p>Damit du bei neuen Raids benachrichtigt wirst, musst du dir einen Charakter angelegen</p>
+    <p>
+        <a class="btn btn-primary btn-lg" href="/character/create" role="button">Charakter anlegen</a>
+        <a class="btn btn-primary btn-lg" href="/raid/list" role="button">Geplante Raids</a>
+    </p> 
+<?php else : ?>
+    <p>Willkommen beim Raidplaner von <?php echo $f3->get('GUILDNAME') ?>.</p>
+    <p>Um die Funktionen dieses Raidplaners nutzen zu können, musst du dir einen User-Account erstellen.</p>
+    <p><a class="btn btn-primary btn-lg" href="/user/create" role="button">Registrieren</a></p>
+<?php endif ?>
+</div>
+
+

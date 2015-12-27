@@ -35,11 +35,15 @@ class RaidRegistrationForm extends Form
                 'type' => 'numeric',
                 'required' => true,
             ),
+            'role' => array(
+                'type' => 'numeric',
+                'required' => true,
+            ),
             'participation' => array(
                 'type' => 'numeric',
                 'required' => true,
             ),
-            'text' => array(
+            'comment' => array(
                 'type' => 'string',
                 'required' => false,
             ),            

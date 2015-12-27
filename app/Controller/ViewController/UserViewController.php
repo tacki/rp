@@ -75,35 +75,35 @@ class UserViewController extends ViewController
             
             case 'mailvalidation':
                 $userdb = $this->getDB('users');  
-                $user = $userdb->findone('id = '.$f3->get('PARAMS.userid'));
+                $user = $userdb->findone(array('id=?',$f3->get('PARAMS.userid')));
 
 
                 if ($user->dry() || $user->mailvalidation !== $f3->get('PARAMS.validationkey')) {
-                    $f3->set('SESSION.errormsg', 'Mailvalidation invalid! Account already activated?');
+                    $f3->set('SESSION.errormsg', 'Mailvalidierung ungültig! Account bereits aktiviert?');
                     $f3->reroute('/auth');                
                 } else {
                     $user->mailvalidation = '';
                     $user->save();
-                    $f3->set('SESSION.successmsg', 'Account activated! Please login.');
+                    $f3->set('SESSION.successmsg', 'Account aktiviert! Bitte einloggen.');
                     $f3->reroute('/auth');
                 }             
                 break;
 
             case 'edit':
                 $usersDB = $this->getDB('users');
-                $user = $usersDB->findone('id = '.$f3->get('PARAMS.userid'));
+                $user = $usersDB->findone(array('id=?',$f3->get('PARAMS.userid')));
                 
                 $f3->set('user', $user);            
                 break;   
             
             case 'delete':
                 $usersDB = $this->getDB('users');
-                $user = $usersDB->findone('id = '.$f3->get('PARAMS.userid'));
+                $user = $usersDB->findone(array('id=?',$f3->get('PARAMS.userid')));
                 
                 $f3->set('user', $user);
                 
                 $charactersDB = $this->getDB('characters');
-                $characters = $charactersDB->find('userid = '.$f3->get('PARAMS.userid'));
+                $characters = $charactersDB->find(array('userid=?',$f3->get('PARAMS.userid')));
                 
                 $f3->set('characters', $characters);
                 break;                
@@ -113,7 +113,7 @@ class UserViewController extends ViewController
     public function post($f3)
     {
         if($f3->get('PARAMS.userid') && !$this->editOrViewAllowed($f3->get('PARAMS.userid'))) {
-            $f3->set('SESSION.errormsg', 'Not Allowed!');
+            $f3->set('SESSION.errormsg', 'Nicht erlaubt!');
             $f3->reroute('/user/edit/'.$f3->get('SESSION.user.id'));
         }        
         
@@ -125,13 +125,13 @@ class UserViewController extends ViewController
                 if ($this->userRegistrationForm->isValid($f3->get('POST'))) {   
 
                     $userDB = $this->getDB('users');
-                    if ($userDB->findone('email=\''.$f3->get('POST.email').'\'')) {
-                        $f3->set('SESSION.errormsg', 'EMail invalid or already registered!');
+                    if ($userDB->findone(array('email=?',$f3->get('POST.email')))) {
+                        $f3->set('SESSION.errormsg', 'EMail ungültig oder bereits registriert!');
                         $f3->reroute('/user/create');
                     }
                     if ($f3->get('POST.password') !== $f3->get('POST.password2')) {
                         $f3->set('SESSION.failedFields', array('password', 'password2'));
-                        $f3->set('SESSION.errormsg', 'Passwords do not match');
+                        $f3->set('SESSION.errormsg', 'Passwörter stimmen nicht überein');
                         $f3->reroute('/user/create');                        
                     }                    
 
@@ -143,9 +143,9 @@ class UserViewController extends ViewController
                     // Send Mail
                     $f3->set('newuser', $newUser);
                     $this->mail->setSubject("RaidPlaner Registration")
-                               ->sendMessage("registration", $newUser->email);
+                               ->sendMessage("registration", array($newUser->email));
                     
-                    $f3->set('SESSION.successmsg', 'User created! Check your Mails to validate your EMail Address.');
+                    $f3->set('SESSION.successmsg', 'Benutzer erstellt! Prüfe deine EMails um die EMail-Adresse zu bestätigen.');
                     //$f3->reroute('/auth');
                 } else {            
                     $f3->set('SESSION.failedFields', array_keys($this->userRegistrationForm->getFailedFields()));
@@ -156,20 +156,20 @@ class UserViewController extends ViewController
                 
             case 'edit':
                 $userDB = $this->getDB('users');
-                $user = $userDB->findone('id = '.$f3->get('PARAMS.userid'));
+                $user = $userDB->findone(array('id=',$f3->get('PARAMS.userid')));
                 
                 $crypt = \Bcrypt::instance();
                 
                 if ($this->userEditForm->isValid($f3->get('POST'))) {  
                     if ($f3->get('POST.password') !== $f3->get('POST.password2')) {
                         $f3->set('SESSION.failedFields', array('password', 'password2'));
-                        $f3->set('SESSION.errormsg', 'Passwords do not match');
+                        $f3->set('SESSION.errormsg', 'Passwörter stimmen nicht überein');
                         $f3->reroute('/user/edit/'.$f3->get('PARAMS.userid'));                        
                     }
                     
                     $user->password = $crypt->hash($f3->get('POST.password',$f3->get('crypt.SALT')));
                     $user->save();       
-                    $f3->set('SESSION.successmsg', 'Data changed!');
+                    $f3->set('SESSION.successmsg', 'Daten geändert!');
                     $f3->reroute('/user/edit/'.$f3->get('PARAMS.userid'));
                 } else {            
                     $f3->set('SESSION.failedFields', array_keys($this->userEditForm->getFailedFields()));
@@ -180,18 +180,12 @@ class UserViewController extends ViewController
                 
             case 'delete':
                 $charactersDB = $this->getDB('characters');
-                $characters = $charactersDB->find('userid = '.$f3->get('PARAMS.userid'));
-
-                foreach ($characters as $character) {
-                    $character->erase();
-                }
-
+                $charactersDB->erase(array('userid=?',$f3->get('PARAMS.userid')));
+                
                 $usersDB = $this->getDB('users');
-                $user = $usersDB->findone('id = '.$userid);
+                $usersDB->erase(array('id=?',$f3->get('PARAMS.userid')));
 
-                $user->erase();
-
-                $f3->reroute('/users/list');
+                $f3->reroute('/user/list');
                 break;
         }
     }
