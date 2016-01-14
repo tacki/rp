@@ -11,53 +11,86 @@ return array (
         5 => 1078,
         6 => 1135,
     ),
+    'subclasschangeable' => true,
     'classes' => array(
         1 => array (
             'name' => 'Krieger',
             'subclasses' => array (
-                1 => 'Berserker',
-                2 => 'Beschützer',
+                1 => array(
+                    'name' => 'Berserker',
+                    'role' => 1,
+                ),
+                2 => array(
+                    'name' => 'Beschützer',
+                    'role' => 2,                    
+                ),
             ),
         ),
         2 => array (
             'name' => 'Schurke',
             'subclasses' => array (
-                1 => 'Duellant',
-                2 => 'Asssasine',
+                1 => array(
+                    'name' => 'Duellant',
+                    'role' => 1,                   
+                ),
+                2 => array(
+                    'name' => 'Asssasine',
+                    'role' => 1,       
+                ),                
             ),  
         ),
         3 => array(
             'name' => 'Hüter',
             'subclasses' => array (
-                1 => 'Sturmrufer',
-                2 => 'Erdrufer',
+                1 => array(
+                    'name' => 'Sturmrufer',
+                    'role' => 1,                    
+                ),
+                2 => array(
+                    'name' => 'Erdrufer',
+                    'role' => 2,
+                ),                
             ),
         ),
         4 => array(
             'name' => 'Magier',
             'subclasses' => array (
-                1 => 'Pyromant',
-                2 => 'Kryomant',
+                1 => array(
+                    'name' => 'Pyromant',
+                    'role' => 1,
+                ),
+                2 => array(
+                    'name' => 'Kryomant',
+                    'role' => 1, 
+                ),                
             ), 
         ),
         5 => array(
             'name' => 'Waldläufer',
             'subclasses' => array (
-                1 => 'Schütze',
-                2 => 'Barde',
+                1 => array(
+                    'name' => 'Schütze',
+                    'role' => 1,                    
+                ),
+                2 => array(
+                    'name' => 'Barde',
+                    'role' => 1,                                        
+                ),                
             ),  
         ),
         6 => array(
             'name' => 'Okkultist',
             'subclasses' => array (
-                1 => 'Peiniger',
-                2 => 'Manipulator',
+                1 => array(
+                    'name' => 'Peiniger',
+                    'role' => 1,
+                ),
+                2 => array(
+                    'name' => 'Manipulator',
+                    'role' => 1,                                        
+                ),                   
             ),   
         ),
-    ),
-    'hybridclasses' => array(
-        1,
-        3,
     ),
     'raids' => array(
         1 => array(
@@ -136,7 +169,6 @@ return array (
     'roles' => array(
         1 => 'DD',
         2 => 'Tank',
-        3 => 'Tank/DD',
     ),
 );
 

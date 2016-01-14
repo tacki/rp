@@ -57,10 +57,10 @@
             </select>
         </div>        
 
-        <div class="form-group" id="role">    
+        <div class="form-group" id="roles">    
             <label class="control-label">Bevorzugte Rolle</label>
             <?php foreach ($f3->get('game.roles') as $id=>$role) : ?>
-            <div class="radio">
+            <div class="radio" name="roleselect<?php echo $id ?>">
                 <label><input type="radio" name="role" value='<?php echo $id ?>'><?php echo $role ?></label>
             </div>      
             <?php endforeach ?>         
@@ -84,15 +84,27 @@
 
 <script>
 $(function () {
-    var hybridids = <?php echo json_encode($f3->get('game.hybridclasses')) ?>;
-    
-    $("#class").change(function() {
-        $('input[name=role][value=1]').prop("checked",true);        
-        if (hybridids.indexOf(parseInt($(this).val())) >= 0) {
-            $("#role").show();
-        } else {
-            $("#role").hide();
-        }
+    $("#class").change(function() {        
+        $.ajax({
+            url: "/api/specification/getroles/"+$(this).val(), 
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',            
+            success: function(result){                
+                if(result.length > 1) {
+                    $('input[name=role]:first').prop("checked",true);
+                    $('#roles').show();
+                    $('div[name*=roleselect]').hide();
+                    
+                    result.forEach(function (role) {
+                        $('div[name=roleselect'+role+']').show(); 
+                    });                    
+                } else {
+                    $('input[name=role]').removeAttr("checked");
+                    $('input[name=role][value='+result+']').prop("checked",true);
+                    $('#roles').hide();
+                }
+            }
+        });        
     });  
     
     // Fire on onload
@@ -121,7 +133,6 @@ $(function () {
             <input type="text" name="class" id="class" value="<?php echo $f3->get("game.classes.{$character->class}.name") ?>" class="form-control" readonly> 
         </div> 
         
-        <?php if (in_array($character->class, $f3->get('game.hybridclasses'))) : ?>
         <div class="form-group" id="role">    
             <label class="control-label">Bevorzugte Rolle</label>
             <?php foreach ($f3->get('game.roles') as $id=>$role) : ?>
@@ -130,7 +141,6 @@ $(function () {
             </div>      
             <?php endforeach ?>         
         </div>          
-        <?php endif ?>
 
         <div class="form-group">
             <label class="control-label">Rüstwert</label>    
