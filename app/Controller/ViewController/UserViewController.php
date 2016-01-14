@@ -58,6 +58,8 @@ class UserViewController extends ViewController
         switch ($f3->get('PARAMS.action')) {
             default:
             case 'list':
+                $f3->set('headTitle', 'Benutzerliste');
+                
                 $usersDB = $this->getDB('users');
                 $users = $usersDB->find();
                 

@@ -50,6 +50,8 @@ class CharacterViewController extends ViewController
         
         switch ($f3->get('PARAMS.action')) {
             case 'list':
+                $f3->set('headTitle', 'Charakter Liste');
+                
                 $characterDB = $this->getDB('characters');
                 $characters = $characterDB->find(array('userid=?',$f3->get('SESSION.user.id')));
                 
